@@ -7,7 +7,7 @@
 #include "freertos/timers.h"
 
 
-
+extern TaskHandle_t task_Mqtt;
 
 #define WIFI_SSID "Perfect"
 #define WIFI_PASSWORD "1234567890"
@@ -68,9 +68,11 @@ static void onWiFiEvent(WiFiEvent_t event) {
         Serial.print("Local ip address is: \t");
         Serial.println(WiFi.localIP());
         // xTimerStart(mqttReconnectTimer,0);
+        vTaskResume(task_Mqtt);
         break;
 
     case SYSTEM_EVENT_STA_DISCONNECTED:
+        vTaskSuspend(task_Mqtt);
         Logger::Warn("onWiFiEvent:: WifiEvent== SYSTEM_EVENT_STA_DISCONNECTED reconnecting");
         WiFi.reconnect();   // simpler than statemachine?
         break;
