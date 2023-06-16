@@ -1,19 +1,21 @@
 #include "mqtt_subscriber_manager.h"
-// #include "mqtt_client.h"
 #include "von/cpp/utility/logger.h"
-// #include "von/cpp/mqtt/task_mqtt.h"
 #include "../g_var.h"
 
-void gs_MqttSubscriberManager::Init(){
+
+static bool __debug_mode = false;
+static MqttSubscriberBase* __all_subscribers[20];
+static int __subscriber_count = 0;
+
+void gs_MqttSubscriberManager::Init(bool debug_mode){
+    __debug_mode = debug_mode;
+    g_mqttClient.onSubscribe(this->onMqttSubscribe);
     g_mqttClient.onUnsubscribe(this->onMqttUnsubscribe);
     g_mqttClient.onMessage(this->onMqttMessage);
-    g_mqttClient.onSubscribe(this->onMqttSubscribe);
-
 }
 
 void gs_MqttSubscriberManager::onMqttSubscribe(uint16_t packetId, uint8_t qos) {
-    bool debug = false;
-    if (debug){
+    if (__debug_mode){
         Serial.println("[Info] wifi_mqtt_client.cpp   onMqttSubscribe()   Subscribe acknowledged.");
         Serial.print("  packetId: ");
         Serial.println(packetId);
@@ -29,8 +31,7 @@ void gs_MqttSubscriberManager::onMqttUnsubscribe(uint16_t packetId) {
 }
 
 void gs_MqttSubscriberManager::onMqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties properties, size_t len, size_t index, size_t total) {
-    bool debug = false;
-    if (debug){
+    if (__debug_mode){
         Serial.println("onMqttMessage().");
         Serial.print("  topic: ");
         Serial.println(topic);
@@ -49,7 +50,8 @@ void gs_MqttSubscriberManager::onMqttMessage(char* topic, char* payload, AsyncMq
         Serial.print("  total: ");
         Serial.println(total);
     }
-
+    MqttSubscriberBase* subscriber =  gs_MqttSubscriberManager::__find_subscriber(topic);
+    subscriber->onGot_MqttMessage_piece(topic, payload,len,index,total);
 }
 
 
@@ -80,12 +82,12 @@ MqttSubscriberBase* gs_MqttSubscriberManager::__find_subscriber(const char* topi
 //     subscriber->onGot_MqttMessage(&__mqttPayloadBuffer[0], __mqttPayloadBuffer.size());
 // }
 
-void gs_MqttSubscriberManager::on_mqtt_client_received_message(char* topic, char* payload,  size_t len, size_t index, size_t total){
-    MqttSubscriberBase* subscriber = __find_subscriber(topic);
+// void gs_MqttSubscriberManager::on_mqtt_client_received_message(char* topic, char* payload,  size_t len, size_t index, size_t total){
+//     MqttSubscriberBase* subscriber = __find_subscriber(topic);
     
 
 
-}
+// }
 
 void gs_MqttSubscriberManager::AddSubscriber(const char* mqtt_topic, MqttSubscriberBase* subscriber){
     __all_subscribers[__subscriber_count] = subscriber;
