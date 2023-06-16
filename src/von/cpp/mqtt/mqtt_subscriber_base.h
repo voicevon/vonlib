@@ -1,6 +1,6 @@
 #pragma once
 #include "stdint.h"
-#include "von/cpp/basic/text/mqtt_topic.h"
+#include "von/cpp/mqtt/mqtt_topic.h"
 
 class MqttSubscriberBase{
     public:
