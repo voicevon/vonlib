@@ -11,7 +11,7 @@ class MqttSubscriberBase{
 
         void onGot_MqttMessage_piece(char* topic, char* payload,  size_t len, size_t index, size_t total); 
         // The payload is variable data. type, I can not dertermin.
-        virtual void onGot_MqttMessage_whole(char* payload, size_t total_len){}; 
+        virtual void onGot_MqttMessage_whole(const char* payload, size_t total_len){}; 
         
     protected:
         MqttTopic _mqtt_topic;
