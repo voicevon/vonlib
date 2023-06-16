@@ -17,7 +17,7 @@
 #define MQTT_UID "von"
 #define MQTT_PASSWORD "von1970"
 
-
+TaskHandle_t task_Mqtt;
 AsyncMqttClient g_mqttClient;
 static TimerHandle_t mqttReconnectTimer;
 static  SmartMqttClient::EnumState __ConnectionState = SmartMqttClient::EnumState::DISCONNECTED;

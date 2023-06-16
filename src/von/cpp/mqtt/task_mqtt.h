@@ -3,6 +3,7 @@
 #include <AsyncMqttClient.h>
 #include "von/cpp/mqtt/mqtt_topic.h"
 
+
 class SmartMqttClient{
     public:
         enum EnumState{
@@ -28,6 +29,8 @@ class SmartMqttClient{
 
     private:
         SmartMqttClient(){};
+        
+
         static bool mqtt_is_connected;
         static MqttTopic mqtt_topics[20];
 
@@ -43,5 +46,6 @@ class SmartMqttClient{
 
 
 extern AsyncMqttClient g_mqttClient;  //TODO:  be a static method of a class
-
 extern void TaskMqtt(void* parameter);
+extern TaskHandle_t task_Mqtt;
+
