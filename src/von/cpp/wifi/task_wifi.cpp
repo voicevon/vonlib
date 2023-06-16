@@ -86,7 +86,7 @@ static void onWiFiEvent(WiFiEvent_t event) {
 /// @brief Will auto reconnect if lost connnection.
 void ConnectToWifi_FakeTask() {
     WiFi.onEvent(onWiFiEvent);
-    Logger::Info("wifi_mqtt_client.cpp  connectToWifi().");
+    Logger::Info("ConnectToWifi_FakeTask Connecting to WiFi..");
     Logger::Print("wifi_ssid", WIFI_SSID);
     Logger::Print("wifi_password", WIFI_PASSWORD);
     WiFi.mode(WIFI_STA);   // cause brown-out, why?
