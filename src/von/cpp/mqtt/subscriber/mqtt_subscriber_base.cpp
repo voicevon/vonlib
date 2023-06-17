@@ -19,14 +19,14 @@ void MqttSubscriberBase::onGot_MqttMessage_piece(char* topic, char* payload,  si
     
 	// here, our mqttPayloadBuffer is compplete
     __mqttPayloadBuffer.push_back(char(0x00));
-    Logger::Info("MqttSubscriberBase::onGot_MqttMessage_piece() --> got whole content");
-    Logger::Print("", &__mqttPayloadBuffer[0]);
+    // Logger::Info("MqttSubscriberBase::onGot_MqttMessage_piece() --> got whole content");
+    // Logger::Print("", &__mqttPayloadBuffer[0]);
     _onGot_MqttMessage_whole(&__mqttPayloadBuffer[0], __mqttPayloadBuffer.size());
     if (__got_mqttmessage_service_function == nullptr){
-        Logger::Error("MqttSubscriberBase::  __got_mqttmessage_service_function  is nullptr");
-        Logger::Halt("");
+        Logger::Warn("MqttSubscriberBase::  __got_mqttmessage_service_function  is nullptr");
+    }else{
+        __got_mqttmessage_service_function(this);
     }
-    __got_mqttmessage_service_function(this);
 
 }
 

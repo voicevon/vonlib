@@ -106,7 +106,7 @@ void gs_MqttSubscriberManager::mqtt_subscribe(const char* topic){
     g_mqttClient.subscribe(topic, 2);
 }
 
-void gs_MqttSubscriberManager::mqtt_subscribe_with_topicIndex(const char* topic, int topic_id){
+void gs_MqttSubscriberManager::mqtt_subscribe_with_topicIndex(const char* topic, int subsciber_id){
     g_mqttClient.subscribe(topic, 2);
 }
 
@@ -114,10 +114,11 @@ void gs_MqttSubscriberManager::mqtt_subscribe_with_topicIndex(const char* topic,
 
 // }
 
-int gs_MqttSubscriberManager::mqtt_read_payload(const int topic_id, char* payload){
-    return 1;
+int gs_MqttSubscriberManager::mqtt_read_payload(const int subsciber_id, const char* payload){
+    payload = __all_subscribers[subsciber_id]->ReadPayload_as_string();
+    return __all_subscribers[subsciber_id]->GetPayloadLength();
 }
 
-void gs_MqttSubscriberManager::mqtt_release_buffer(const int topic_id){
+void gs_MqttSubscriberManager::mqtt_release_buffer(const int subsciber_id){
 
 }
