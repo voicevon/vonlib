@@ -3,6 +3,7 @@
 #include "von/cpp/mqtt/mqtt_topic.h"
 #include "stddef.h"  // size_t
 #include "vector"
+#include "stdlib.h"  // atoi(), atof(), atoff()
 
 class MqttSubscriberBase{
     public:
