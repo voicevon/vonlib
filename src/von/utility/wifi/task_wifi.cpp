@@ -1,7 +1,7 @@
 #include <WiFi.h>
 #include "esp_wifi.h"
 // #include "von/c/utility/logger/logger.hpp"
-#include "von/cpp/utility/logger.h"
+#include "von/utility/logger.h"
 
 #include "freertos/FreeRTOS.h"
 #include "freertos/timers.h"

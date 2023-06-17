@@ -1,5 +1,5 @@
 #pragma once
-#include "von/cpp/basic/c_string/c_string_base.h"
+#include "von/basic/c_string/c_string_base.h"
 
 #define MAX_LENGTH_OF_MQTT_TOPIC_CHARS_LENGTH 40
 

@@ -1,6 +1,6 @@
 #pragma once
 #include "stdint.h"
-#include "von/cpp/mqtt/mqtt_topic.h"
+#include "von/utility/mqtt/mqtt_topic.h"
 #include "stddef.h"  // size_t
 #include "vector"
 #include "stdlib.h"  // atoi(), atof(), atoff()

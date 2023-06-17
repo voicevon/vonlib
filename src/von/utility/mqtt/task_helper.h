@@ -1,8 +1,8 @@
 #pragma once
 #include "stdint.h"
 
-#include "von/cpp/mqtt/mqtt_topic.h"
-#include "von/cpp/mqtt/g_var.h"
+#include "von/utility/mqtt/mqtt_topic.h"
+#include "von/utility/mqtt/g_var.h"
 
 class MqttTaskHelper{
     public:
