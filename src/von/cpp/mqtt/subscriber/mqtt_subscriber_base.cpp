@@ -2,8 +2,9 @@
 #include "von/cpp/utility/logger.h"
 
 
-void MqttSubscriberBase::SubscribeMqtt(const char* mqtt_topic){
+void MqttSubscriberBase::Init(const char* mqtt_topic, int id){
     _mqtt_topic.CopyFrom(mqtt_topic);
+    __my_id = id;
 }
 
 void MqttSubscriberBase::onGot_MqttMessage_piece(char* topic, char* payload,  size_t len, size_t index, size_t total){

@@ -7,8 +7,9 @@
 
 class MqttSubscriberBase{
     public:
-        void SubscribeMqtt(const char* mqtt_topic);
+        void Init(const char* mqtt_topic, int id);
         MqttTopic* GetMqttTopic(){return &_mqtt_topic;};
+        int GetId(){return __my_id;};
 
         //TODO:  friend class
         void onGot_MqttMessage_piece(char* topic, char* payload,  size_t len, size_t index, size_t total); 
@@ -25,6 +26,7 @@ class MqttSubscriberBase{
         virtual void _onGot_MqttMessage_whole(const char* payload, size_t total_len){}; 
         MqttTopic _mqtt_topic;
 		std::vector<char> __mqttPayloadBuffer = {};
+        int __my_id = 0;
         void (*__got_mqttmessage_service_function)(MqttSubscriberBase*) = nullptr;
 };
 

@@ -5,7 +5,7 @@
 
 static bool __debug_mode = false;
 static MqttSubscriberBase* __all_subscribers[20];
-static int __subscriber_count = 0;
+static int __subscriber_id = 0;
 
 void gs_MqttSubscriberManager::Init(bool debug_mode){
     __debug_mode = debug_mode;
@@ -59,7 +59,7 @@ MqttSubscriberBase* gs_MqttSubscriberManager::__find_subscriber(const char* topi
 
     MqttSubscriberBase* subscriber;
     // Logger::Debug("gs_MqttSubscriberManager::on_mqtt_client_received_message()");
-    for (int i=0; i<__subscriber_count; i++){
+    for (int i=0; i<__subscriber_id; i++){
         // try to find who is subscribing this topic
         subscriber = __all_subscribers[i];
         // if (subscriber->IsTopicEqualTo(topic)){
@@ -90,12 +90,12 @@ MqttSubscriberBase* gs_MqttSubscriberManager::__find_subscriber(const char* topi
 // }
 
 void gs_MqttSubscriberManager::AddSubscriber(const char* mqtt_topic, MqttSubscriberBase* subscriber){
-    __all_subscribers[__subscriber_count] = subscriber;
-    subscriber->SubscribeMqtt(mqtt_topic);
+    __all_subscribers[__subscriber_id] = subscriber;
+    subscriber->Init(mqtt_topic, __subscriber_id);
     g_mqttClient.subscribe(mqtt_topic, 2);
 
-    __subscriber_count++;
-    if (__subscriber_count >=20){
+    __subscriber_id++;
+    if (__subscriber_id >=20){
         Logger::Warn(" gs_MqttSubscriberManager::AddSubscriber   will overflow if put another subscriber");
     }
 }
