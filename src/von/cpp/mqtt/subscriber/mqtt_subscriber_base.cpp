@@ -26,7 +26,7 @@ void MqttSubscriberBase::onGot_MqttMessage_piece(char* topic, char* payload,  si
         Logger::Error("MqttSubscriberBase::  __got_mqttmessage_service_function  is nullptr");
         Logger::Halt("");
     }
-    __got_mqttmessage_service_function();
+    __got_mqttmessage_service_function(this);
 
 }
 
