@@ -1,4 +1,6 @@
 #include <WiFi.h>
+#include "task_wifi.hpp"
+
 #include "esp_wifi.h"
 // #include "von/c/utility/logger/logger.hpp"
 #include "von/utility/logger.h"
@@ -9,19 +11,6 @@
 
 extern TaskHandle_t task_Mqtt;
 
-#define WIFI_SSID "Perfect"
-#define WIFI_PASSWORD "1234567890"
-
-// #define WIFI_SSID "CentOS"
-// #define WIFI_PASSWORD "1234567890"
-
-
-// #define WIFI_SSID "FuckGFW"
-// #define WIFI_PASSWORD "refuckgfw"
-
-
-// #define WIFI_SSID "369"
-// #define WIFI_PASSWORD "hahafeng12200"
 
 int state = 0;   // 0=idle, 1= connecting 2= connected, 3 = failed 
 
@@ -84,15 +73,16 @@ static void onWiFiEvent(WiFiEvent_t event) {
 }
 
 /// @brief Will auto reconnect if lost connnection.
-void ConnectToWifi_FakeTask() {
+void ConnectToWifi_FakeTask(void* parameters) {
+    WiFiCredential* wifi_credential = (WiFiCredential*)(parameters);
     WiFi.onEvent(onWiFiEvent);
     Logger::Info("ConnectToWifi_FakeTask Connecting to WiFi..");
-    Logger::Print("wifi_ssid", WIFI_SSID);
-    Logger::Print("wifi_password", WIFI_PASSWORD);
+    Logger::Print("wifi_ssid", wifi_credential->ssid);
+    // Logger::Print("wifi_password", wifi_credential->password);
     WiFi.mode(WIFI_STA);   // cause brown-out, why?
     WiFi.disconnect();       //disconnect from an AP if it was previously connected     
     ESP_ERROR_CHECK(esp_wifi_set_protocol(WIFI_IF_STA, WIFI_PROTOCOL_11B |WIFI_PROTOCOL_11G | WIFI_PROTOCOL_11N));
-	WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
+	WiFi.begin(wifi_credential->ssid, wifi_credential->password);
 
 }
 

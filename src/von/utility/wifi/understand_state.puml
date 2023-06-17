@@ -1,4 +1,4 @@
-@startuml
+@startuml wifi_statemachine
 [*] -> WL_NO_SHIELD
 [*] ->    WL_IDLE_STATUS
 [*] ->    WL_NO_SSID_AVAIL
