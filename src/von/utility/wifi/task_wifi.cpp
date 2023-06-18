@@ -1,5 +1,5 @@
 #include <WiFi.h>
-#include "task_wifi.hpp"
+#include "task_wifi.h"
 
 #include "esp_wifi.h"
 // #include "von/c/utility/logger/logger.hpp"
@@ -10,7 +10,8 @@
 
 
 extern TaskHandle_t task_Mqtt;
-
+static bool __control_mqtt_task;
+static bool __IsConnected = false;
 
 int state = 0;   // 0=idle, 1= connecting 2= connected, 3 = failed 
 
@@ -57,12 +58,18 @@ static void onWiFiEvent(WiFiEvent_t event) {
         Serial.print("Local ip address is: \t");
         Serial.println(WiFi.localIP());
         // xTimerStart(mqttReconnectTimer,0);
-        vTaskResume(task_Mqtt);
+        if (__control_mqtt_task){
+            vTaskResume(task_Mqtt);
+        }
+        __IsConnected = true;
         break;
 
     case SYSTEM_EVENT_STA_DISCONNECTED:
-        vTaskSuspend(task_Mqtt);
+        if(__control_mqtt_task){
+            vTaskSuspend(task_Mqtt);
+        }
         Logger::Warn("onWiFiEvent:: WifiEvent== SYSTEM_EVENT_STA_DISCONNECTED reconnecting");
+        __IsConnected = false;
         WiFi.reconnect();   // simpler than statemachine?
         break;
 
@@ -74,15 +81,20 @@ static void onWiFiEvent(WiFiEvent_t event) {
 
 /// @brief Will auto reconnect if lost connnection.
 void ConnectToWifi_FakeTask(void* parameters) {
-    WiFiCredential* wifi_credential = (WiFiCredential*)(parameters);
+    WiFiTask_config * task_config = (WiFiTask_config*)(parameters);
+    __control_mqtt_task = task_config->ControlMqttTask;
     WiFi.onEvent(onWiFiEvent);
     Logger::Info("ConnectToWifi_FakeTask Connecting to WiFi..");
-    Logger::Print("wifi_ssid", wifi_credential->ssid);
+    Logger::Print("wifi_ssid", task_config->ssid);
     // Logger::Print("wifi_password", wifi_credential->password);
     WiFi.mode(WIFI_STA);   // cause brown-out, why?
     WiFi.disconnect();       //disconnect from an AP if it was previously connected     
     ESP_ERROR_CHECK(esp_wifi_set_protocol(WIFI_IF_STA, WIFI_PROTOCOL_11B |WIFI_PROTOCOL_11G | WIFI_PROTOCOL_11N));
-	WiFi.begin(wifi_credential->ssid, wifi_credential->password);
+	WiFi.begin(task_config->ssid, task_config->password);
+    if (task_config->Asyncconnection) return;
+    while (!__IsConnected){
+        vTaskDelay(1);
+    }
 
 }
 
