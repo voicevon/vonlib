@@ -1,12 +1,10 @@
 #include "mono_led_gpio.h"
 #include "von/utility/logger.h"
-// Led::Led(uint8_t id, uint8_t pin, uint8_t turn_on_level):BinaryOutput_GPIO(id, pin, turn_on_level){
-    
-// }
+
 
 
 void Mono_Led_GPIO::SetState(EnumState new_state){
-    switch (__state){
+    switch (new_state){
         case TURN_ON:
             this->TurnOn();
             break;
@@ -21,6 +19,7 @@ void Mono_Led_GPIO::SetState(EnumState new_state){
             Logger::Error("Mono_Led_GPIO::SetState()  Unknown new_state");
             Logger::Print("new_state", new_state);
             Logger::Halt("");
+            break;
     }
 }
 
