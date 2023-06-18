@@ -9,8 +9,8 @@
 #include "freertos/timers.h"
 
 
-extern TaskHandle_t task_Mqtt;
-static bool __control_mqtt_task;
+// extern TaskHandle_t task_Mqtt;
+// static bool __control_mqtt_task;
 static bool __IsConnected = false;
 
 int state = 0;   // 0=idle, 1= connecting 2= connected, 3 = failed 
@@ -58,16 +58,16 @@ static void onWiFiEvent(WiFiEvent_t event) {
         Serial.print("Local ip address is: \t");
         Serial.println(WiFi.localIP());
         // xTimerStart(mqttReconnectTimer,0);
-        if (__control_mqtt_task){
-            vTaskResume(task_Mqtt);
-        }
+        // if (__control_mqtt_task){
+        //     vTaskResume(task_Mqtt);
+        // }
         __IsConnected = true;
         break;
 
     case SYSTEM_EVENT_STA_DISCONNECTED:
-        if(__control_mqtt_task){
-            vTaskSuspend(task_Mqtt);
-        }
+        // if(__control_mqtt_task){
+        //     vTaskSuspend(task_Mqtt);
+        // }
         Logger::Warn("onWiFiEvent:: WifiEvent== SYSTEM_EVENT_STA_DISCONNECTED reconnecting");
         __IsConnected = false;
         WiFi.reconnect();   // simpler than statemachine?
@@ -82,7 +82,7 @@ static void onWiFiEvent(WiFiEvent_t event) {
 /// @brief Will auto reconnect if lost connnection.
 void ConnectToWifi_FakeTask(void* parameters) {
     WiFiTask_config * task_config = (WiFiTask_config*)(parameters);
-    __control_mqtt_task = task_config->ControlMqttTask;
+    // __control_mqtt_task = task_config->ControlMqttTask;
     WiFi.onEvent(onWiFiEvent);
     Logger::Info("ConnectToWifi_FakeTask Connecting to WiFi..");
     Logger::Print("wifi_ssid", task_config->ssid);

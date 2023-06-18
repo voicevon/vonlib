@@ -1,7 +1,7 @@
 struct WiFiTask_config {
     char* ssid;
     char* password;
-    bool ControlMqttTask;
+    // bool ControlMqttTask;
     bool Asyncconnection;
 };
 
