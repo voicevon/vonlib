@@ -11,9 +11,9 @@
 
 // extern TaskHandle_t task_Mqtt;
 // static bool __control_mqtt_task;
-static bool __IsConnected = false;
+// static bool __IsConnected = false;
 
-int state = 0;   // 0=idle, 1= connecting 2= connected, 3 = failed 
+int VonWiFiState = 0;   // 0=idle, 1= connecting 2= connected, 3 = failed 
 
 void wifi_scan_ap(){
     // WiFi.scanNetworks will return the number of networks found
@@ -61,7 +61,7 @@ static void onWiFiEvent(WiFiEvent_t event) {
         // if (__control_mqtt_task){
         //     vTaskResume(task_Mqtt);
         // }
-        __IsConnected = true;
+        VonWiFiState = 2;
         break;
 
     case SYSTEM_EVENT_STA_DISCONNECTED:
@@ -69,7 +69,7 @@ static void onWiFiEvent(WiFiEvent_t event) {
         //     vTaskSuspend(task_Mqtt);
         // }
         Logger::Warn("onWiFiEvent:: WifiEvent== SYSTEM_EVENT_STA_DISCONNECTED reconnecting");
-        __IsConnected = false;
+        VonWiFiState = 1;
         WiFi.reconnect();   // simpler than statemachine?
         break;
 
@@ -81,6 +81,7 @@ static void onWiFiEvent(WiFiEvent_t event) {
 
 /// @brief Will auto reconnect if lost connnection.
 void ConnectToWifi_FakeTask(void* parameters) {
+    VonWiFiState = 0;
     WiFiTask_config * task_config = (WiFiTask_config*)(parameters);
     // __control_mqtt_task = task_config->ControlMqttTask;
     WiFi.onEvent(onWiFiEvent);
@@ -92,7 +93,7 @@ void ConnectToWifi_FakeTask(void* parameters) {
     ESP_ERROR_CHECK(esp_wifi_set_protocol(WIFI_IF_STA, WIFI_PROTOCOL_11B |WIFI_PROTOCOL_11G | WIFI_PROTOCOL_11N));
 	WiFi.begin(task_config->ssid, task_config->password);
     if (task_config->Asyncconnection) return;
-    while (!__IsConnected){
+    while (VonWiFiState !=2){
         vTaskDelay(1);
     }
 
