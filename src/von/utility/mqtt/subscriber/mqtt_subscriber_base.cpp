@@ -31,3 +31,11 @@ void MqttSubscriberBase::onGot_MqttMessage_piece(char* topic, char* payload,  si
 
 }
 
+const char* MqttSubscriberBase::ReadPayload_as_string(){
+    // Logger::Debug("MqttSubscriberBase::ReadPayload_as_string()");
+    // Logger::Print(this->_mqtt_topic.c_str(), this->GetId());
+    // Logger::Print("payload_length", this->GetPayloadLength());
+    // Logger::Print("payload ", &__mqttPayloadBuffer[0]);
+    return &__mqttPayloadBuffer[0];
+}
+

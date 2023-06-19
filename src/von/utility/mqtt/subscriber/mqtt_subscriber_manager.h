@@ -13,8 +13,9 @@ class gs_MqttSubscriberManager{
         void AddSubscriber(const char* mqtt_topic, MqttSubscriberBase* subscriber);
         static void mqtt_subscribe(const char* topic);
         static void mqtt_subscribe_with_topicIndex(const char* topic, int subsciber_id);
-        static int mqtt_read_payload(const int subsciber_id, const char* payload);
-        static void mqtt_release_buffer(const int subsciber_id);
+        static int mqtt_get_payload_length( int subsciber_id);
+        static const char* mqtt_read_payload( int subsciber_id);
+        static void mqtt_release_buffer( int subsciber_id);
 
     private:
         static MqttSubscriberBase* __find_subscriber(const char* topic);
