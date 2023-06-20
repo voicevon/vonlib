@@ -26,7 +26,7 @@ void MqttTaskHelper::Init(){
     __ConnectionState = EnumState::SUSPENDED;
     g_mqttClient.onConnect(this->onMqttConnected);
     g_mqttClient.onDisconnect(this->onMqttDisconnect);
-
+    
     g_mqttClient.onPublish(this->onMqttPublish);
 
     g_mqttClient.setServer(MQTT_HOST, MQTT_PORT);
@@ -69,7 +69,6 @@ void MqttTaskHelper::onMqttDisconnect(AsyncMqttClientDisconnectReason reason) {
         Logger::Print("reason code",(uint8_t)reason);
         Logger::Print("reason", reason_str.c_str());
         __ConnectionState = SUSPENDED;
-        vTaskDelay(5000);
         return;
     } 
     if (reason == AsyncMqttClientDisconnectReason::MQTT_UNACCEPTABLE_PROTOCOL_VERSION) {
@@ -102,14 +101,22 @@ void MqttTaskHelper::SetStateToSubscribed(){
     __ConnectionState = EnumState::SUBSCRIBED;
 }
 
+static uint64_t __connecting_start_at;
 
 void MqttTaskHelper::StatemachineSpinOnce(){
     if (__ConnectionState == EnumState::SUSPENDED){
         if (g_von_wifi_state== VonWiFiState::VonWiFi_Connected){
             Logger::Info ("Connecting to MQTT...");
             // __started_at = millis();
+            __connecting_start_at = millis();
             g_mqttClient.connect();
             __ConnectionState = EnumState::CONNECTING;
+        }
+    }
+    if (__ConnectionState == EnumState::CONNECTING){
+        if (millis() - __connecting_start_at > 3000){
+            // time out
+            __ConnectionState = EnumState::SUSPENDED;
         }
     }
 }

@@ -8,6 +8,7 @@ static MqttSubscriberBase* __all_subscribers[20];
 static int __subscriber_id = 0;
 
 void gs_MqttSubscriberManager::Init(bool debug_mode){
+    __subscriber_id = 0;  // For the case: reconnecting, resubscribe,
     __debug_mode = debug_mode;
     g_mqttClient.onSubscribe(this->onMqttSubscribe);
     g_mqttClient.onUnsubscribe(this->onMqttUnsubscribe);
@@ -71,23 +72,6 @@ MqttSubscriberBase* gs_MqttSubscriberManager::__find_subscriber(const char* topi
     Logger::Print("mqtt topic", topic);
     return nullptr;
 }
-
-// void gs_MqttSubscriberManager::on_mqtt_client_received_message(char* topic, char* payload,  size_t payload_len){
-//     MqttSubscriberBase* subscriber = __find_subscriber(topic);
-//     __mqttPayloadBuffer.clear();
-//     for (int i=0; i<payload_len; i++){
-//         __mqttPayloadBuffer.push_back(*(payload+i));
-//     }
-//     __mqttPayloadBuffer.push_back(char(0x00));
-//     subscriber->onGot_MqttMessage(&__mqttPayloadBuffer[0], __mqttPayloadBuffer.size());
-// }
-
-// void gs_MqttSubscriberManager::on_mqtt_client_received_message(char* topic, char* payload,  size_t len, size_t index, size_t total){
-//     MqttSubscriberBase* subscriber = __find_subscriber(topic);
-    
-
-
-// }
 
 void gs_MqttSubscriberManager::AddSubscriber(const char* mqtt_topic, MqttSubscriberBase* subscriber){
     __all_subscribers[__subscriber_id] = subscriber;
