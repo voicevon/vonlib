@@ -17,20 +17,13 @@ MqttTaskHelper::EnumState MqttTaskHelper::GetState(){
     return __ConnectionState;
 }
 
-// void MqttTaskHelper::ConnectToBroker() {
-// 	Logger::Info ("Connecting to MQTT...");
-//     __started_at = millis();
-
-// 	g_mqttClient.connect();
-//     __ConnectionState = EnumState::CONNECTING;
-// }
 
 void MqttTaskHelper::DisconnectFromBroker(){
     g_mqttClient.disconnect();
 }
 
 void MqttTaskHelper::Init(){
-    __ConnectionState = EnumState::DISCONNECTED;
+    __ConnectionState = EnumState::SUSPENDED;
     g_mqttClient.onConnect(this->onMqttConnected);
     g_mqttClient.onDisconnect(this->onMqttDisconnect);
 
@@ -66,16 +59,22 @@ void MqttTaskHelper::onMqttConnected(bool sessionPresent) {
     }
     __ConnectionState = EnumState::CONNECTED;
 
-    // If you want , add app's callback to subscribe.
-    // app_mqtt_subscribe();
-    // MqttTaskHelper::mqtt_is_connected = true;
 }
 
 void MqttTaskHelper::onMqttDisconnect(AsyncMqttClientDisconnectReason reason) {
     Logger::Warn("MQTT event: onMqttDisconnect()");
-    String reason_str = "   reason = ";
-    if (reason == AsyncMqttClientDisconnectReason::TCP_DISCONNECTED) reason_str.concat("TCP_DISCONNECTED"); 
-    if (reason == AsyncMqttClientDisconnectReason::MQTT_UNACCEPTABLE_PROTOCOL_VERSION) reason_str.concat("MQTT_UNACCEPTABLE_PROTOCOL_VERSION"); 
+    String reason_str = "";
+    if (reason == AsyncMqttClientDisconnectReason::TCP_DISCONNECTED){
+        reason_str.concat("TCP_DISCONNECTED"); 
+        Logger::Print("reason code",(uint8_t)reason);
+        Logger::Print("reason", reason_str.c_str());
+        __ConnectionState = SUSPENDED;
+        vTaskDelay(5000);
+        return;
+    } 
+    if (reason == AsyncMqttClientDisconnectReason::MQTT_UNACCEPTABLE_PROTOCOL_VERSION) {
+        reason_str.concat("MQTT_UNACCEPTABLE_PROTOCOL_VERSION"); 
+    }
     if (reason == AsyncMqttClientDisconnectReason::MQTT_IDENTIFIER_REJECTED) reason_str.concat("MQTT_IDENTIFIER_REJECTED"); 
     if (reason == AsyncMqttClientDisconnectReason::MQTT_SERVER_UNAVAILABLE) reason_str.concat("MQTT_SERVER_UNAVAILABLE"); 
     if (reason == AsyncMqttClientDisconnectReason::MQTT_MALFORMED_CREDENTIALS) reason_str.concat("MQTT_MALFORMED_CREDENTIALS"); 
@@ -84,10 +83,6 @@ void MqttTaskHelper::onMqttDisconnect(AsyncMqttClientDisconnectReason reason) {
     if (reason == AsyncMqttClientDisconnectReason::TLS_BAD_FINGERPRINT) reason_str.concat("TLS_BAD_FINGERPRINT"); 
     Logger::Print("reason code",(uint8_t)reason);
     Logger::Print("reason", reason_str.c_str());
-
-	// if (WiFi.isConnected()) {
-	// 	xTimerStart(mqttReconnectTimer, 0);
-	// }
     __ConnectionState = EnumState::DISCONNECTED;
 
 }
@@ -102,9 +97,6 @@ void MqttTaskHelper::onMqttPublish(uint16_t packetId) {
 	}
 }
 
-// void MqttTaskHelper::mqtt_publish(const char* topic, const char* payload){
-//     g_mqttClient.publish(topic, 2,true, payload);
-// }
 
 void MqttTaskHelper::SetStateToSubscribed(){
     __ConnectionState = EnumState::SUBSCRIBED;
@@ -112,9 +104,7 @@ void MqttTaskHelper::SetStateToSubscribed(){
 
 
 void MqttTaskHelper::StatemachineSpinOnce(){
-    
-    
-    if (__ConnectionState == EnumState::DISCONNECTED){
+    if (__ConnectionState == EnumState::SUSPENDED){
         if (g_von_wifi_state== VonWiFiState::VonWiFi_Connected){
             Logger::Info ("Connecting to MQTT...");
             // __started_at = millis();
