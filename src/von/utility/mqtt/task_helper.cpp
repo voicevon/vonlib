@@ -1,5 +1,6 @@
 #include "task_helper.h"
 #include "von/utility/logger.h"
+#include "von/utility/wifi/fake_task_wifi_state.h"
 #include "g_var.h"
 
 #define MQTT_HOST "voicevon.vicp.io"
@@ -7,6 +8,7 @@
 #define MQTT_UID "von"
 #define MQTT_PASSWORD "von1970"
 
+extern VonWiFiState g_von_wifi_state;
 
 static TimerHandle_t mqttReconnectTimer;
 static  MqttTaskHelper::EnumState __ConnectionState = MqttTaskHelper::EnumState::DISCONNECTED;
@@ -15,13 +17,13 @@ MqttTaskHelper::EnumState MqttTaskHelper::GetState(){
     return __ConnectionState;
 }
 
-void MqttTaskHelper::ConnectToBroker() {
-	Logger::Info ("Connecting to MQTT...");
-    __ConnectionState = EnumState::CONNECTING;
-    __started_at = millis();
+// void MqttTaskHelper::ConnectToBroker() {
+// 	Logger::Info ("Connecting to MQTT...");
+//     __started_at = millis();
 
-	g_mqttClient.connect();
-}
+// 	g_mqttClient.connect();
+//     __ConnectionState = EnumState::CONNECTING;
+// }
 
 void MqttTaskHelper::DisconnectFromBroker(){
     g_mqttClient.disconnect();
@@ -41,7 +43,6 @@ void MqttTaskHelper::Init(){
 
 //TODO:  subsribe topics after:  disconnected --> connected.
 void MqttTaskHelper::onMqttConnected(bool sessionPresent) {
-    __ConnectionState = EnumState::CONNECTED;
     Logger::Info("MQTT event:  onMqttConnected()");
     Serial.print("Session present: ");
     Serial.print(sessionPresent);
@@ -63,13 +64,14 @@ void MqttTaskHelper::onMqttConnected(bool sessionPresent) {
         Serial.print("Publishing at QoS 2, packetId: ");
         Serial.println(packetIdPub2);
     }
+    __ConnectionState = EnumState::CONNECTED;
+
     // If you want , add app's callback to subscribe.
     // app_mqtt_subscribe();
     // MqttTaskHelper::mqtt_is_connected = true;
 }
 
 void MqttTaskHelper::onMqttDisconnect(AsyncMqttClientDisconnectReason reason) {
-    __ConnectionState = EnumState::DISCONNECTED;
     Logger::Warn("MQTT event: onMqttDisconnect()");
     String reason_str = "   reason = ";
     if (reason == AsyncMqttClientDisconnectReason::TCP_DISCONNECTED) reason_str.concat("TCP_DISCONNECTED"); 
@@ -86,6 +88,8 @@ void MqttTaskHelper::onMqttDisconnect(AsyncMqttClientDisconnectReason reason) {
 	// if (WiFi.isConnected()) {
 	// 	xTimerStart(mqttReconnectTimer, 0);
 	// }
+    __ConnectionState = EnumState::DISCONNECTED;
+
 }
 
 
@@ -101,3 +105,21 @@ void MqttTaskHelper::onMqttPublish(uint16_t packetId) {
 // void MqttTaskHelper::mqtt_publish(const char* topic, const char* payload){
 //     g_mqttClient.publish(topic, 2,true, payload);
 // }
+
+void MqttTaskHelper::SetStateToSubscribed(){
+    __ConnectionState = EnumState::SUBSCRIBED;
+}
+
+
+void MqttTaskHelper::StatemachineSpinOnce(){
+    
+    
+    if (__ConnectionState == EnumState::DISCONNECTED){
+        if (g_von_wifi_state== VonWiFiState::VonWiFi_Connected){
+            Logger::Info ("Connecting to MQTT...");
+            // __started_at = millis();
+            g_mqttClient.connect();
+            __ConnectionState = EnumState::CONNECTING;
+        }
+    }
+}

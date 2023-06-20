@@ -1,0 +1,17 @@
+@startuml statemachine
+
+[*] -> idle
+idle --> wifi_connecting 
+wifi_connecting --> wifi_connected  : WIFI_EVENT: GOT_LOCAL_IP
+wifi_connected --> wifi_connecting : WIFI_EVENT: DISCONNECTED
+
+
+
+mqtt_connected --> mqtt_disconnected : MQTT_EVENT: on_disconnected
+mqtt_disconnected --> mqtt_connecting 
+mqtt_connecting --> mqtt_connected : MQTT_EVENT: on_connected
+mqtt_connected --> mqtt_subscribed
+mqtt_connecting --> mqtt_disconnected : MQTT_EVENT: on_disconnected  \n??? to be confirmed, no event of timeout
+wifi_connected -[dashed]-> mqtt_disconnected
+
+@endum;

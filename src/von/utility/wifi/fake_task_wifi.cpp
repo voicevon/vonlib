@@ -1,5 +1,6 @@
 #include <WiFi.h>
-#include "task_wifi.h"
+#include "fake_task_wifi.h"
+#include "fake_task_wifi_state.h"
 
 #include "esp_wifi.h"
 // #include "von/c/utility/logger/logger.hpp"
@@ -13,7 +14,8 @@
 // static bool __control_mqtt_task;
 // static bool __IsConnected = false;
 
-int VonWiFiState = 0;   // 0=idle, 1= connecting 2= connected, 3 = failed 
+extern VonWiFiState g_von_wifi_state;
+
 
 void wifi_scan_ap(){
     // WiFi.scanNetworks will return the number of networks found
@@ -61,7 +63,7 @@ static void onWiFiEvent(WiFiEvent_t event) {
         // if (__control_mqtt_task){
         //     vTaskResume(task_Mqtt);
         // }
-        VonWiFiState = 2;
+        g_von_wifi_state = VonWiFi_Connected;
         break;
 
     case SYSTEM_EVENT_STA_DISCONNECTED:
@@ -69,8 +71,8 @@ static void onWiFiEvent(WiFiEvent_t event) {
         //     vTaskSuspend(task_Mqtt);
         // }
         Logger::Warn("onWiFiEvent:: WifiEvent== SYSTEM_EVENT_STA_DISCONNECTED reconnecting");
-        VonWiFiState = 1;
         WiFi.reconnect();   // simpler than statemachine?
+        g_von_wifi_state = VonWiFi_Connecting;
         break;
 
     default:
@@ -81,7 +83,7 @@ static void onWiFiEvent(WiFiEvent_t event) {
 
 /// @brief Will auto reconnect if lost connnection.
 void ConnectToWifi_FakeTask(void* parameters) {
-    VonWiFiState = 0;
+    g_von_wifi_state = VonWiFiState::VonWiFi_Idle;
     WiFiTask_config * task_config = (WiFiTask_config*)(parameters);
     // __control_mqtt_task = task_config->ControlMqttTask;
     WiFi.onEvent(onWiFiEvent);
@@ -93,7 +95,7 @@ void ConnectToWifi_FakeTask(void* parameters) {
     ESP_ERROR_CHECK(esp_wifi_set_protocol(WIFI_IF_STA, WIFI_PROTOCOL_11B |WIFI_PROTOCOL_11G | WIFI_PROTOCOL_11N));
 	WiFi.begin(task_config->ssid, task_config->password);
     if (task_config->Asyncconnection) return;
-    while (VonWiFiState !=2){
+    while (g_von_wifi_state != VonWiFiState::VonWiFi_Connected){
         vTaskDelay(1);
     }
 
