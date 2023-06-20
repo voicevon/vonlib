@@ -10,6 +10,7 @@ class gs_MqttSubscriberManager{
             return __instance;
         };
         void Init(bool debug_mode);
+        void ReSubscribeAll();
         void AddSubscriber(const char* mqtt_topic, MqttSubscriberBase* subscriber);
         static void mqtt_subscribe(const char* topic);
         static void mqtt_subscribe_with_topicIndex(const char* topic, int subsciber_id);

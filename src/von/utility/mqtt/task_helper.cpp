@@ -1,6 +1,7 @@
 #include "task_helper.h"
 #include "von/utility/logger.h"
 #include "von/utility/wifi/fake_task_wifi_state.h"
+#include "von/utility/mqtt/subscriber/mqtt_subscriber_manager.h"
 #include "g_var.h"
 
 #define MQTT_HOST "voicevon.vicp.io"
@@ -118,5 +119,9 @@ void MqttTaskHelper::StatemachineSpinOnce(){
             // time out
             __ConnectionState = EnumState::SUSPENDED;
         }
+    }
+    if (__ConnectionState == EnumState::CONNECTED){
+        // ReSubscribe
+        gs_MqttSubscriberManager::Instance().ReSubscribeAll();
     }
 }

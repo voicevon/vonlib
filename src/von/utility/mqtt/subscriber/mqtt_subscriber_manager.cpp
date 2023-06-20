@@ -15,6 +15,15 @@ void gs_MqttSubscriberManager::Init(bool debug_mode){
     g_mqttClient.onMessage(this->onMqttMessage);
 }
 
+void gs_MqttSubscriberManager::ReSubscribeAll(){
+    const char* mqtt_topic;
+    for (int i=0; i<__subscriber_id; i++){
+        mqtt_topic = __all_subscribers[i]->GetMqttTopic()->c_str();
+        g_mqttClient.subscribe(mqtt_topic, 2);
+    }
+
+}
+
 void gs_MqttSubscriberManager::onMqttSubscribe(uint16_t packetId, uint8_t qos) {
     if (__debug_mode){
         Serial.println("[Info] wifi_mqtt_client.cpp   onMqttSubscribe()   Subscribe acknowledged.");
